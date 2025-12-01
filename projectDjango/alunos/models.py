@@ -12,7 +12,7 @@ class Aluno(models.Model):
 
     @property
     def resumo_financeiro(self):
-        from financeiro.models import ResumoFinanceiroAluno
+        from templates.financeiro.models import ResumoFinanceiroAluno
         return ResumoFinanceiroAluno(self)
 
     @property

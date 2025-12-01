@@ -1,5 +1,5 @@
 from django.db import models
-from alunos.models import Aluno
+from templates.alunos.models import Aluno
 from cursos.models import Curso
 
 class Matricula(models.Model):
@@ -23,13 +23,11 @@ class Matricula(models.Model):
 
     @property
     def total_pagamentos(self):
-        from financeiro.models import Transacao
         pagamentos = self.transacoes.filter(tipo='pagamento')
         return sum(t.valor for t in pagamentos) if pagamentos else 0
 
     @property
     def total_reembolsos(self):
-        from financeiro.models import Transacao
         reembolsos = self.transacoes.filter(tipo='reembolso')
         return sum(t.valor for t in reembolsos) if reembolsos else 0
 

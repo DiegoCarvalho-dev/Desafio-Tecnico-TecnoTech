@@ -32,7 +32,7 @@ class MatriculaAdmin(admin.ModelAdmin):
 
     def marcar_como_pago(self, request, queryset):
         for matricula in queryset:
-            from financeiro.models import Transacao
+            from templates.financeiro import Transacao
             if matricula.saldo_devido > 0:
                 Transacao.objects.create(
                     matricula=matricula,
