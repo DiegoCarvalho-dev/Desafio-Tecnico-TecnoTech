@@ -7,6 +7,7 @@ from cursos.views import CursoViewSet
 from matriculas.views import MatriculaViewSet
 from financeiro.views import TransacaoViewSet, RelatorioView
 from core.views import dashboard_geral, historico_aluno
+from core.views import dashboard_geral, historico_aluno, sql_bruto_relatorio
 
 router = DefaultRouter()
 router.register(r'alunos', AlunoViewSet)
@@ -20,4 +21,5 @@ urlpatterns = [
     path('api/relatorios/', RelatorioView.as_view(), name='relatorios'),
     path('dashboard/', dashboard_geral, name='dashboard'),
     path('aluno/<int:aluno_id>/historico/', historico_aluno, name='historico_aluno'),
+    path('api/sql-bruto/', sql_bruto_relatorio, name='sql-bruto'),
 ]
