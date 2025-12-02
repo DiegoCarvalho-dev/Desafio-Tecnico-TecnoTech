@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from templates.alunos.models import Aluno
+from alunos.models import Aluno
 from cursos.models import Curso
 from matriculas.models import Matricula
 
