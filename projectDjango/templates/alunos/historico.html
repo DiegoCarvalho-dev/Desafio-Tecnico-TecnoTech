@@ -100,14 +100,14 @@
             <div class="card">
                 <h3>Total pago</h3>
                 <div class="valor pago">
-                    R$ {{ aluno.total_pago }}
+                    R$ {{ aluno.total_pago|floatformat:2 }}
                 </div>
             </div>
 
             <div class="card">
                 <h3>Total devido</h3>
                 <div class="valor pendente">
-                    R$ {{ aluno.total_devido }}
+                    R$ {{ aluno.total_devido|floatformat:2 }}
                 </div>
             </div>
         </div>
@@ -130,9 +130,9 @@
                 <td class="{% if matricula.status_pagamento == 'pago' %}pago{% else %}pendente{% endif %}">
                     {{ matricula.get_status_pagamento_display }}
                 </td>
-                <td>R$ {{ matricula.curso.valor_inscricao }}</td>
-                <td>R$ {{ matricula.total_pagamentos }}</td>
-                <td>R$ {{ matricula.saldo_devido }}</td>
+                <td>R$ {{ matricula.valor_inscricao|floatformat:2 }}</td>
+                <td>R$ {{ matricula.total_pagamentos|floatformat:2 }}</td>
+                <td>R$ {{ matricula.saldo_devido|floatformat:2 }}</td>
             </tr>
             {% empty %}
             <tr>

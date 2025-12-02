@@ -89,13 +89,13 @@
 
         <div class="card">
             <h3>Total recebido</h3>
-            <div class="valor recebido">R$ {{ total_recebido }}</div>
+            <div class="valor recebido">R$ {{ total_recebido|floatformat:2 }}</div>
             <p>Valor já pago pelos alunos</p>
         </div>
 
         <div class="card">
             <h3>Total pendente</h3>
-            <div class="valor pendente">R$ {{ total_pendente }}</div>
+            <div class="valor pendente">R$ {{ total_pendente|floatformat:2 }}</div>
             <p>Valor ainda em aberto</p>
         </div>
 
