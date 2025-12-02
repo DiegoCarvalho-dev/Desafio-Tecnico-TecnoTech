@@ -5,7 +5,8 @@ from cursos.models import Curso
 from matriculas.models import Matricula
 from financeiro.models import Transacao
 from django.db.models import Sum
-
+from django.db import connection
+from django.http import JsonResponse
 
 def dashboard_geral(request):
     total_alunos = Aluno.objects.count()
@@ -74,3 +75,32 @@ def historico_aluno(request, aluno_id):
     }
     return render(request, 'alunos/historico.html', context)
 
+
+def sql_bruto_relatorio(request):
+    query = """
+    SELECT 
+        c.nome AS curso_nome,
+        COUNT(m.id) AS total_matriculas,
+        SUM(CASE WHEN m.status_pagamento = 'pago' THEN 1 ELSE 0 END) AS matriculas_pagas,
+        SUM(CASE WHEN m.status_pagamento = 'pendente' THEN 1 ELSE 0 END) AS matriculas_pendentes,
+        COALESCE(SUM(t.valor), 0) AS total_arrecadado
+    FROM cursos_curso c
+    LEFT JOIN matriculas_matricula m ON c.id = m.curso_id
+    LEFT JOIN financeiro_transacao t ON m.id = t.matricula_id
+    GROUP BY c.id, c.nome
+    ORDER BY total_arrecadado DESC
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        columns = [col[0] for col in cursor.description]
+        results = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    return JsonResponse({
+        'titulo': 'Relatório SQL Bruto - Total arrecadado por curso',
+        'dados': results,
+        'query_executada': query
+    })
