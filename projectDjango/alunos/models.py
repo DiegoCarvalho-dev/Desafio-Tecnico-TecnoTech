@@ -12,8 +12,8 @@ class Aluno(models.Model):
 
     @property
     def resumo_financeiro(self):
-        from templates.financeiro.models import ResumoFinanceiroAluno
-        return ResumoFinanceiroAluno(self)
+        from financeiro.models import ResumoFinanceiroAluno
+        return ResumoFinanceiroAluno(self)  # ← NÃO USA .objects!
 
     @property
     def total_pago(self):
@@ -22,6 +22,10 @@ class Aluno(models.Model):
     @property
     def total_devido(self):
         return self.resumo_financeiro.total_devido
+
+    @property
+    def historico_transacoes(self):
+        return self.resumo_financeiro.historico_transacoes
 
     class Meta:
         verbose_name = 'Aluno'
