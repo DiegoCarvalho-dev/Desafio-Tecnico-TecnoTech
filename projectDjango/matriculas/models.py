@@ -1,5 +1,5 @@
 from django.db import models
-from templates.alunos.models import Aluno
+from alunos.models import Aluno
 from cursos.models import Curso
 
 class Matricula(models.Model):
