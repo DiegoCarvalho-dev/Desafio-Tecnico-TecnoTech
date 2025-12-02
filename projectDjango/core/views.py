@@ -12,16 +12,19 @@ def dashboard_geral(request):
     total_alunos = Aluno.objects.count()
     cursos_ativos = Curso.objects.filter(status='ativo').count()
 
-    matriculas_pagas = Matricula.objects.filter(status_pagamento='pago').count()
-    matriculas_pendentes = Matricula.objects.filter(status_pagamento='pendente').count()
+    matriculas = Matricula.objects.all()
+    matriculas_pagas = sum(1 for m in matriculas if m.saldo_devido <= 0)
+    matriculas_pendentes = sum(1 for m in matriculas if m.saldo_devido > 0)
 
-    total_recebido = Transacao.objects.filter(matricula__status_pagamento='pago').aggregate(
+    total_recebido = Transacao.objects.filter(tipo='pagamento').aggregate(
         total=Sum('valor')
     )['total'] or 0
 
-    total_pendente = Matricula.objects.filter(status_pagamento='pendente').aggregate(
-        total=Sum('curso__valor_inscricao')
-    )['total'] or 0
+    total_pendente = sum(
+        matricula.saldo_devido
+        for matricula in Matricula.objects.all()
+        if matricula.saldo_devido > 0
+    )
 
     context = {
         'total_alunos': total_alunos,
@@ -36,22 +39,26 @@ def dashboard_geral(request):
 
 def historico_aluno(request, aluno_id):
     aluno = get_object_or_404(Aluno, id=aluno_id)
-
     matriculas = Matricula.objects.filter(aluno=aluno).select_related('curso')
 
-    total_pago = Transacao.objects.filter(matricula__aluno=aluno).aggregate(
-        total=Sum('valor')
-    )['total'] or 0
+    total_pago = Transacao.objects.filter(
+        matricula__aluno=aluno,
+        tipo='pagamento'
+    ).aggregate(total=Sum('valor'))['total'] or 0
 
-    total_devido = Matricula.objects.filter(aluno=aluno, status_pagamento='pendente').aggregate(
-        total=Sum('curso__valor_inscricao')
-    )['total'] or 0
+    total_devido = sum(
+        matricula.saldo_devido
+        for matricula in matriculas
+        if matricula.saldo_devido > 0
+    )
 
     matriculas_com_info = []
     for matricula in matriculas:
-        total_pagamentos = Transacao.objects.filter(matricula=matricula).aggregate(
-            total=Sum('valor')
-        )['total'] or 0
+        total_pagamentos = Transacao.objects.filter(
+            matricula=matricula,
+            tipo='pagamento'
+        ).aggregate(total=Sum('valor'))['total'] or 0
+
         saldo_devido = matricula.curso.valor_inscricao - total_pagamentos
 
         matriculas_com_info.append({
@@ -71,7 +78,7 @@ def historico_aluno(request, aluno_id):
             'total_pago': total_pago,
             'total_devido': total_devido,
         },
-        'matriculas': matriculas_com_info,  # Agora é lista de dicionários
+        'matriculas': matriculas_com_info,
     }
     return render(request, 'alunos/historico.html', context)
 
