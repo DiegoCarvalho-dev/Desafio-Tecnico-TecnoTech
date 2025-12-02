@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from alunos.models import Aluno
 from cursos.models import Curso
 
@@ -11,12 +12,27 @@ class Matricula(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='matriculas')
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='matriculas')
     data_matricula = models.DateField(auto_now_add=True)
-
     status_pagamento = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
         default='pendente'
     )
+
+    def clean(self):
+        if self.curso.status != 'ativo':
+            raise ValidationError('Não é possível matricular aluno em curso inativo.')
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+        if self.saldo_devido <= 0:
+            self.status_pagamento = 'pago'
+        else:
+            self.status_pagamento = 'pendente'
+
+        super().save(update_fields=['status_pagamento'])
 
     def __str__(self):
         return f'{self.aluno.nome} - {self.curso.nome} ({self.get_status_pagamento_display()})'
@@ -38,13 +54,6 @@ class Matricula(models.Model):
     @property
     def esta_quitada(self):
         return self.saldo_devido <= 0
-
-    def atualizar_status_pagamento(self):
-        if self.esta_quitada:
-            self.status_pagamento = 'pago'
-        else:
-            self.status_pagamento = 'pendente'
-        self.save()
 
     class Meta:
         verbose_name = 'Matrícula'
